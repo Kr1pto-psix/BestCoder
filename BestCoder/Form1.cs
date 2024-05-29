@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -42,6 +43,11 @@ namespace BestCoder
             timeToToolStripMenuItem.Checked = relax;
             this.relaxTimeText.Text = RelaxTime.ToString();
             this.idleTimeText.Text = this.idleTime.ToString();
+
+            notifyIcon1.BalloonTipTitle = "Best coder";
+            notifyIcon1.BalloonTipText = "best coder is collapsed";
+            notifyIcon1.Text = "Bast coder";
+            
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -176,6 +182,30 @@ namespace BestCoder
             }
             Properties.Settings.Default.RelaxTime = this.RelaxTime;
             Properties.Settings.Default.Save();
+        }
+
+        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        {
+            this.Show();
+            notifyIcon1.Visible = false;
+            WindowState = FormWindowState.Normal;
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+                notifyIcon1.Visible = true;
+                notifyIcon1.ShowBalloonTip(1000);
+
+            }
+            else if(FormWindowState.Normal == this.WindowState)
+            {
+                notifyIcon1.Visible = false;
+            }
+            
+
         }
     }
 }
