@@ -19,7 +19,8 @@ namespace BestCoder
             this.labelVersion.Text = String.Format("Версия {0}", AssemblyVersion);
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
-            this.textBoxDescription.Text = AssemblyDescription;
+            this.textBoxDescription.Text = AssemblyDescription + "\nOfficial repository https://github.com/Kr1pto-psix/BestCoder \nDevelop by Alex";
+
         }
 
         #region Методы доступа к атрибутам сборки

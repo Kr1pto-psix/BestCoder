@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -16,13 +17,18 @@ namespace BestCoder
 {
     public partial class Form1 : Form
     {
-        
+        Motivation motivationPhrases = new Motivation();
+        Kicks kicks;
         int idleTime = 0;
         bool motivation = false;
         String redactorexe = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Programs\\Microsoft VS Code\\Code.exe";
         bool relax = false;
         int RelaxTime = 0;
-
+        int min = 0;
+        int sec = 0;
+        int relaxTimeTimer = 0;
+        int timeToMotivation = 60;
+        int curentidletime = 0;
         public Form1()
         {
             InitializeComponent();
@@ -33,8 +39,8 @@ namespace BestCoder
                 this.relaxTimeText.Text = "0";
             if(Properties.Settings.Default.idleTime == 0)
                 this.idleTimeText.Text = "20";
-
-            redactorexe = Properties.Settings.Default.redactorPath;
+            if(Properties.Settings.Default.redactorPath != "") 
+                redactorexe = Properties.Settings.Default.redactorPath;
             idleTime = Properties.Settings.Default.idleTime;
             RelaxTime = Properties.Settings.Default.RelaxTime;
             motivation = Properties.Settings.Default.motivation;
@@ -47,15 +53,14 @@ namespace BestCoder
             notifyIcon1.BalloonTipTitle = "Best coder";
             notifyIcon1.BalloonTipText = "best coder is collapsed";
             notifyIcon1.Text = "Bast coder";
+            this.button2.Enabled = false;
+            Debug.WriteLine(Path.GetFileName(redactorexe));
+            this.kicks = new Kicks(this.redactorexe);
+            timer2.Start();
             
         }
 
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AboutForm about = new AboutForm();
-            about.ShowDialog();
-        }
-
+      
         private void motivationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool buf = motivationToolStripMenuItem.Checked;
@@ -111,8 +116,9 @@ namespace BestCoder
             if (this.openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 this.redactorexe = openFileDialog1.FileName;
-                Properties.Settings.Default.redactorPath = this.redactorexe;
+                Properties.Settings.Default.redactorPath = this.redactorexe; 
                 Properties.Settings.Default.Save();
+                this.kicks = new Kicks(this.redactorexe);
             }
            
         }
@@ -158,27 +164,44 @@ namespace BestCoder
 
         private void idleTimeText_TextChanged(object sender, EventArgs e)
         {
-            if (this.idleTimeText.Text != "")
-                this.idleTime = Int32.Parse(this.idleTimeText.Text);
+            if(this.idleTimeText.Text == "0")
+            {
+                this.idleTime = 1;
+                this.idleTimeText.Text = "1";
+            }
             else
             {
-                this.idleTime = 0;
+                if (this.idleTimeText.Text != "")
+                    this.idleTime = Int32.Parse(this.idleTimeText.Text);
+                else
+                {
+                    this.idleTime = 1;
+                    
+                }
+
             }
             Properties.Settings.Default.idleTime = this.idleTime;
             Properties.Settings.Default.Save();
-            Debug.WriteLine("idle Time" + idleTime);
+            
         }
 
         private void relaxTimeText_TextChanged(object sender, EventArgs e)
         {
-            if(this.relaxTimeText.Text != "")
+            if (this.relaxTimeText.Text == "0")
             {
-                this.RelaxTime = Int32.Parse(this.relaxTimeText.Text);
-                Debug.WriteLine("relaxTime " + this.RelaxTime);
+                this.RelaxTime = 1;
+                this.relaxTimeText.Text = "1";
             }
             else
             {
-                this.RelaxTime = 0;
+                if (this.relaxTimeText.Text != "")
+                {
+                    this.RelaxTime = Int32.Parse(this.relaxTimeText.Text);
+                }
+                else
+                {
+                    this.RelaxTime = 1;
+                }
             }
             Properties.Settings.Default.RelaxTime = this.RelaxTime;
             Properties.Settings.Default.Save();
@@ -206,6 +229,141 @@ namespace BestCoder
             }
             
 
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            sec++;
+            if (sec <= 59)
+            {
+                if(sec <=9)
+                    this.SecLab.Text = "0"+ sec.ToString();
+                else
+                    this.SecLab.Text = sec.ToString();
+            }
+            else
+            {
+                sec = 0;
+                min++;
+                if(min <=9)
+                    this.Minlab.Text = "0" + min.ToString();
+                else
+                    this.Minlab.Text = min.ToString();
+
+                this.SecLab.Text = "0" + sec.ToString();
+                this.relaxTimeTimer++;
+
+                if (motivation)
+                {
+                    this.timeToMotivation--;
+                    Properties.Settings.Default.timeToMotivation = timeToMotivation;
+                    Properties.Settings.Default.Save();
+
+                    if (timeToMotivation == 0)
+                    {
+                        timeToMotivation = 60;
+                        this.motivationPhrases.notifyMotivationUser();
+                    }
+                }
+                
+                if(this.relaxTimeTimer == RelaxTime)
+                {
+                    this.relaxTimeTimer = 0;
+                    if (relax)
+                    {
+                        if (MessageBox.Show("Do you wanna relax?", "it's time to relax", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
+                            this.timer1.Stop();
+                            this.button1.Text = "Start";
+                        }
+                    }
+                    
+                    
+                }
+            }
+
+            if (!Redactor.rdactorIsOpen(this.redactorexe))
+            {
+                this.timer1.Stop();
+                MessageBox.Show("Уже уходишь? Ладно, но код сам себя не напишит", "Message", MessageBoxButtons.OK);
+                Redactor.closeRedactor(this.redactorexe);
+                this.button1.Text = "Start";
+            }
+
+
+
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            if (!Redactor.rdactorIsOpen(this.redactorexe))
+            {
+                MessageBox.Show("Ты наверное перепутал, ты же хочешь покодить не так ли, дак какова у тебя не открыт твой редактор? \n Я открою его тебе", "Message",MessageBoxButtons.OK);
+                Redactor.openRedactor(this.redactorexe);
+            }
+
+            this.button2.Enabled = true;
+            if (this.timer1.Enabled)
+            {
+                this.timer1.Stop();
+                this.button1.Text = "Start";
+                
+            }
+            else
+            {
+                this.timer1.Start();
+                this.button1.Text = "Stop";
+
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.min = 0;
+            this.sec = 0;
+            this.SecLab.Text = "0" + sec.ToString();
+            this.Minlab.Text = "0" + min.ToString();
+
+            //kicks.mem2();
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    this.motivationPhrases.notifyMotivationUser();
+
+            //}
+
+
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            if (!Redactor.rdactorIsOpen(this.redactorexe))
+            {
+                curentidletime++;
+                if (this.curentidletime == idleTime)
+                {
+                    curentidletime = 0;
+                    if (this.WindowState == FormWindowState.Minimized)
+                    {
+                        this.Show();
+                        notifyIcon1.Visible = false;
+                        WindowState = FormWindowState.Normal;
+                    }
+
+                    this.kicks.runRandomKiks();
+                    
+
+                   
+                }
+            }
+            
+        }
+
+        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            AboutForm about = new AboutForm();
+            about.ShowDialog();
         }
     }
 }

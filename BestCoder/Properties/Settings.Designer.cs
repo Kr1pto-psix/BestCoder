@@ -94,5 +94,17 @@ namespace BestCoder.Properties {
                 this["addToStartup"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int timeToMotivation {
+            get {
+                return ((int)(this["timeToMotivation"]));
+            }
+            set {
+                this["timeToMotivation"] = value;
+            }
+        }
     }
 }
