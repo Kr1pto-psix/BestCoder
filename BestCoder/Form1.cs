@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -29,6 +30,7 @@ namespace BestCoder
         int relaxTimeTimer = 0;
         int timeToMotivation = 60;
         int curentidletime = 0;
+        
         public Form1()
         {
             InitializeComponent();
@@ -57,6 +59,7 @@ namespace BestCoder
             Debug.WriteLine(Path.GetFileName(redactorexe));
             this.kicks = new Kicks(this.redactorexe);
             timer2.Start();
+            
             
         }
 
@@ -275,6 +278,7 @@ namespace BestCoder
                         {
                             this.timer1.Stop();
                             this.button1.Text = "Start";
+                            this.timer2.Stop(); 
                         }
                     }
                     
@@ -317,6 +321,11 @@ namespace BestCoder
                 this.button1.Text = "Stop";
 
             }
+
+            if (!this.timer2.Enabled)
+            {
+                this.timer2.Start();
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -335,28 +344,32 @@ namespace BestCoder
 
 
         }
+        
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            if (!Redactor.rdactorIsOpen(this.redactorexe))
-            {
-                curentidletime++;
-                if (this.curentidletime == idleTime)
+           
+                if (!Redactor.rdactorIsOpen(this.redactorexe))
                 {
-                    curentidletime = 0;
-                    if (this.WindowState == FormWindowState.Minimized)
+                    curentidletime++;
+                    if (this.curentidletime == idleTime)
                     {
-                        this.Show();
-                        notifyIcon1.Visible = false;
-                        WindowState = FormWindowState.Normal;
+                        curentidletime = 0;
+                        if (this.WindowState == FormWindowState.Minimized)
+                        {
+                            this.Show();
+                            notifyIcon1.Visible = false;
+                            WindowState = FormWindowState.Normal;
+                        }
+
+                        this.kicks.runRandomKiks();
+
+
+
                     }
-
-                    this.kicks.runRandomKiks();
-                    
-
-                   
+                
                 }
-            }
+            
             
         }
 
@@ -364,6 +377,13 @@ namespace BestCoder
         {
             AboutForm about = new AboutForm();
             about.ShowDialog();
+        }
+
+        private void notesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new Notes().Show();
+            
+
         }
     }
 }

@@ -71,6 +71,16 @@ namespace BestCoder.Properties {
         }
         
         /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _64afd224cddf46d3a38eeef8 {
+            get {
+                object obj = ResourceManager.GetObject("_64afd224cddf46d3a38eeef8", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на &quot;Начни сегодня, чтобы завтра стать лучше, чем вчера.&quot;
         ///&quot;Фронтенд – это магия, которая делает сайты живыми.&quot;
         ///&quot;Каждая строчка кода приближает тебя к совершенству.&quot;
